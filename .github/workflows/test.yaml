@@ -12,6 +12,6 @@ jobs:
       - uses: hashicorp/setup-terraform@v1
       - uses: helm/kind-action@v1.1.0
         with:
-          cluster_name: kind-kind
+          cluster_name: kind
       - run: go test -v -timeout 30m
         working-directory: test
