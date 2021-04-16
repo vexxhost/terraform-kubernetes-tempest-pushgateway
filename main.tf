@@ -1,7 +1,7 @@
 terraform {
   required_providers {
     kubernetes = {
-      source  = "hashicorp/kubernetes"
+      source = "hashicorp/kubernetes"
     }
   }
 }
@@ -9,7 +9,7 @@ terraform {
 resource "kubernetes_secret" "tempest-pushgateway" {
   metadata {
     namespace = var.namespace
-    name = "tempest-pushgateway"
+    name      = "tempest-pushgateway"
   }
 
   data = merge(
@@ -29,7 +29,7 @@ resource "kubernetes_secret" "tempest-pushgateway" {
 resource "kubernetes_cron_job" "tempest-pushgateway" {
   metadata {
     namespace = var.namespace
-    name = "tempest-pushgateway"
+    name      = "tempest-pushgateway"
   }
 
   spec {
@@ -43,7 +43,7 @@ resource "kubernetes_cron_job" "tempest-pushgateway" {
       metadata {}
 
       spec {
-        backoff_limit              = 0
+        backoff_limit = 0
 
         template {
           metadata {
@@ -54,11 +54,11 @@ resource "kubernetes_cron_job" "tempest-pushgateway" {
 
           spec {
             restart_policy = "Never"
-            node_selector = var.node_selector
+            node_selector  = var.node_selector
 
             init_container {
-              name    = "purge-virtual-machines"
-              image   = "osclient/python-openstackclient:latest"
+              name  = "purge-virtual-machines"
+              image = "osclient/python-openstackclient:latest"
               command = [
                 "/bin/bash",
                 "-xc",
@@ -67,8 +67,8 @@ resource "kubernetes_cron_job" "tempest-pushgateway" {
             }
 
             init_container {
-              name    = "purge-volumes"
-              image   = "osclient/python-openstackclient:latest"
+              name  = "purge-volumes"
+              image = "osclient/python-openstackclient:latest"
               command = [
                 "/bin/bash",
                 "-xc",
@@ -77,8 +77,8 @@ resource "kubernetes_cron_job" "tempest-pushgateway" {
             }
 
             init_container {
-              name    = "purge-security-groups"
-              image   = "osclient/python-openstackclient:latest"
+              name  = "purge-security-groups"
+              image = "osclient/python-openstackclient:latest"
               command = [
                 "/bin/bash",
                 "-xc",
@@ -87,9 +87,9 @@ resource "kubernetes_cron_job" "tempest-pushgateway" {
             }
 
             container {
-              name    = "tempest-pushgateway"
-              image   = "vexxhost/tempest-pushgateway:latest"
-              args    = var.tests
+              name  = "tempest-pushgateway"
+              image = "vexxhost/tempest-pushgateway:latest"
+              args  = var.tests
               env_from {
                 secret_ref {
                   name = kubernetes_secret.tempest-pushgateway.metadata[0].name

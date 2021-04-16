@@ -1,19 +1,23 @@
 variable "namespace" {
-  type = string
+  type        = string
+  description = "Namespace for deploying cron job"
 }
 
 variable "schedule" {
-  type    = string
-  default = "*/5 * * * *"
+  type        = string
+  description = "Schedule for cron job"
+  default     = "*/5 * * * *"
 }
 
 variable "env" {
-  type = map
-  sensitive = true
+  type        = map(any)
+  sensitive   = true
+  description = "OpenStack environment variables for project used for testing"
 }
 
 variable "tests" {
-  type = list(string)
+  type        = list(string)
+  description = "List of Tempest tests to run agains the cloud"
   default = [
     "tempest.api.compute.servers.test_create_server.ServersTestBootFromVolume.test_verify_server_details",
     "heat_tempest_plugin.tests.functional.test_resources_list.ResourcesList.test_required_by",
@@ -22,6 +26,7 @@ variable "tests" {
 }
 
 variable "node_selector" {
-  type    = map
-  default = {}
+  type        = map(any)
+  description = "Node selector for cron jobs"
+  default     = {}
 }
