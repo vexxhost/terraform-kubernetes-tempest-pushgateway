@@ -62,7 +62,7 @@ resource "kubernetes_cron_job" "tempest-pushgateway" {
               command = [
                 "/bin/bash",
                 "-xc",
-                "openstack server list --project ${var.env.OS_PROJECT_NAME} --name tempest -c ID -f value | xargs openstack server delete --wait"
+                "openstack server list --name tempest -c ID -f value | xargs -r openstack server delete --wait"
               ]
 
               env_from {
@@ -78,7 +78,7 @@ resource "kubernetes_cron_job" "tempest-pushgateway" {
               command = [
                 "/bin/bash",
                 "-xc",
-                "openstack volume list --project ${var.env.OS_PROJECT_NAME} --name tempest -c ID -f value | xargs openstack volume delete"
+                "openstack volume list --name tempest -c ID -f value | xargs -r openstack volume delete"
               ]
 
               env_from {
@@ -94,7 +94,7 @@ resource "kubernetes_cron_job" "tempest-pushgateway" {
               command = [
                 "/bin/bash",
                 "-xc",
-                "openstack security group list --project ${var.env.OS_PROJECT_NAME} -c ID -f value | xargs openstack security group delete"
+                "openstack security group list -c ID -c Name -f value | grep -v default | cut -d' ' -f1 | xargs -r openstack security group delete"
               ]
 
               env_from {
