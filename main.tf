@@ -64,6 +64,12 @@ resource "kubernetes_cron_job" "tempest-pushgateway" {
                 "-xc",
                 "openstack server list --project ${var.env.OS_PROJECT_NAME} --name tempest -c ID -f value | xargs openstack server delete --wait"
               ]
+
+              env_from {
+                secret_ref {
+                  name = kubernetes_secret.tempest-pushgateway.metadata[0].name
+                }
+              }
             }
 
             init_container {
@@ -74,6 +80,12 @@ resource "kubernetes_cron_job" "tempest-pushgateway" {
                 "-xc",
                 "openstack volume list --project ${var.env.OS_PROJECT_NAME} --name tempest -c ID -f value | xargs openstack volume delete"
               ]
+
+              env_from {
+                secret_ref {
+                  name = kubernetes_secret.tempest-pushgateway.metadata[0].name
+                }
+              }
             }
 
             init_container {
@@ -84,12 +96,19 @@ resource "kubernetes_cron_job" "tempest-pushgateway" {
                 "-xc",
                 "openstack security group list --project ${var.env.OS_PROJECT_NAME} -c ID -f value | xargs openstack security group delete"
               ]
+
+              env_from {
+                secret_ref {
+                  name = kubernetes_secret.tempest-pushgateway.metadata[0].name
+                }
+              }
             }
 
             container {
               name  = "tempest-pushgateway"
               image = "vexxhost/tempest-pushgateway:latest"
               args  = var.tests
+
               env_from {
                 secret_ref {
                   name = kubernetes_secret.tempest-pushgateway.metadata[0].name
