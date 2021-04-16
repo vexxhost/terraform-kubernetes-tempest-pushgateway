@@ -6,5 +6,10 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v1
-      - uses: engineerd/setup-kind@v0.5.0
-      - uses: fac/terratest-github-action@master
+      - uses: actions/setup-go@v1
+      - uses: hashicorp/setup-terraform@v1
+      - uses: helm/kind-action@v1.1.0
+        with:
+          cluster_name: kind-kind
+      - run: go test -v -timeout 30m
+        working-directory: test
