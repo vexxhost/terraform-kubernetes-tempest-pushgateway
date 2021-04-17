@@ -1,5 +1,8 @@
 terraform {
   required_providers {
+    kubectl = {
+      source = "gavinbunney/kubectl"
+    }
     kubernetes = {
       source = "hashicorp/kubernetes"
     }
@@ -136,4 +139,60 @@ resource "kubernetes_cron_job" "tempest-pushgateway" {
       }
     }
   }
+}
+
+resource "kubectl_manifest" "prometheus-rules" {
+    yaml_body = <<YAML
+apiVersion: monitoring.coreos.com/v1
+kind: PrometheusRule
+metadata:
+  namespace: ${var.namespace}
+  name: tempest-pushgateway
+spec:
+  groups:
+  - name: tempest
+    rules:
+    - alert: TempestTestNotRunning
+      expr: |
+        time() - tempest_last_run_unixtime > 900
+      labels:
+        severity: P3
+      annotations:
+        summary: "[`{{`{{$labels.instance}}`}}`] Tempest not reporting"
+        description: >
+          Tempest has not reported in for over 15 minutes which means that the
+          tests are not running and the state of the cloud is unknown.
+    - alert: TempestTestFailure
+      expr: |
+        tempest_last_run_result{tempest_last_run_result="success"} != 1
+      labels:
+        severity: P5
+      annotations:
+        summary: "[`{{`{{$labels.instance}}`}}`] Tempest test failure"
+        description: >
+          The test `{{`{{$labels.instance}}`}}` has failed in it's most recent
+          run.
+    - alert: TempestTestFailure
+      for: 8m
+      expr: |
+        tempest_last_run_result{tempest_last_run_result="success"} != 1
+      labels:
+        severity: P4
+      annotations:
+        summary: "[`{{`{{$labels.instance}}`}}`] Tempest test failure"
+        description: >
+          The test `{{`{{$labels.instance}}`}}` has failed in it's most recent
+          run for 8 minutes.
+    - alert: TempestTestFailure
+      for: 13m
+      expr: |
+        tempest_last_run_result{tempest_last_run_result="success"} != 1
+      labels:
+        severity: P3
+      annotations:
+        summary: "[`{{`{{$labels.instance}}`}}`] Tempest test failure"
+        description: >
+          The test `{{`{{$labels.instance}}`}}` has failed in it's most recent
+          run for 13 minutes.
+YAML
 }
