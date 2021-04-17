@@ -30,3 +30,9 @@ variable "node_selector" {
   description = "Node selector for cron jobs"
   default     = {}
 }
+
+variable "host_aliases" {
+  type        = map(any)
+  description = "Host aliases to setup inside pod"
+  default     = {}
+}

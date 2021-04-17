@@ -134,6 +134,15 @@ resource "kubernetes_cron_job" "tempest-pushgateway" {
                 }
               }
             }
+
+            dynamic "host_aliases" {
+              for_each = var.host_aliases
+
+              content {
+                hostnames = [host_aliases.key]
+                ip        = host_aliases.value
+              }
+            }
           }
         }
       }

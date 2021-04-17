@@ -121,11 +121,14 @@ resource "kubernetes_namespace" "monitoring" {
 module "tempest-pushgateway" {
     source = "../../"
 
-    namespace = kubernetes_namespace.monitoring.metadata[0].name
-    schedule  = "*/1 * * * *"
-    env       = {
+    namespace    = kubernetes_namespace.monitoring.metadata[0].name
+    schedule     = "*/1 * * * *"
+    env          = {
       "OS_USERNAME":     "tempest",
       "OS_PROJECT_NAME": "tempest",
       "OS_PASSWORD":     "secret",
+    }
+    host_aliases = {
+      "internal.dns": "1.2.3.4",
     }
 }
