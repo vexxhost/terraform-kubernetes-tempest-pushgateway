@@ -73,6 +73,22 @@ resource "kubernetes_cron_job" "tempest-pushgateway" {
             }
 
             init_container {
+              name  = "purge-key-pairs"
+              image = "osclient/python-openstackclient:latest"
+              command = [
+                "/bin/bash",
+                "-xc",
+                "openstack keypair list -c Name -f value | xargs -r openstack keypair delete"
+              ]
+
+              env_from {
+                secret_ref {
+                  name = kubernetes_secret.tempest-pushgateway.metadata[0].name
+                }
+              }
+            }
+
+            init_container {
               name  = "purge-volumes"
               image = "osclient/python-openstackclient:latest"
               command = [
