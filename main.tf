@@ -60,9 +60,10 @@ resource "kubernetes_cron_job" "tempest-pushgateway" {
             node_selector  = var.node_selector
 
             init_container {
-              name  = "purge-virtual-machines"
-              image = "osclient/python-openstackclient:latest"
-              command = [
+              name              = "purge-virtual-machines"
+              image             = "osclient/python-openstackclient:latest"
+              image_pull_policy = "IfNotPresent"
+              command           = [
                 "/bin/bash",
                 "-xc",
                 "openstack server list --name tempest -c ID -f value | xargs -r openstack server delete --wait"
@@ -76,9 +77,10 @@ resource "kubernetes_cron_job" "tempest-pushgateway" {
             }
 
             init_container {
-              name  = "purge-key-pairs"
-              image = "osclient/python-openstackclient:latest"
-              command = [
+              name              = "purge-key-pairs"
+              image             = "osclient/python-openstackclient:latest"
+              image_pull_policy = "IfNotPresent"
+              command           = [
                 "/bin/bash",
                 "-xc",
                 "openstack keypair list -c Name -f value | xargs -r openstack keypair delete"
@@ -92,9 +94,10 @@ resource "kubernetes_cron_job" "tempest-pushgateway" {
             }
 
             init_container {
-              name  = "purge-volumes"
-              image = "osclient/python-openstackclient:latest"
-              command = [
+              name              = "purge-volumes"
+              image             = "osclient/python-openstackclient:latest"
+              image_pull_policy = "IfNotPresent"
+              command           = [
                 "/bin/bash",
                 "-xc",
                 "openstack volume list --name tempest -c ID -f value | xargs -r openstack volume delete"
@@ -108,9 +111,10 @@ resource "kubernetes_cron_job" "tempest-pushgateway" {
             }
 
             init_container {
-              name  = "purge-security-groups"
-              image = "osclient/python-openstackclient:latest"
-              command = [
+              name              = "purge-security-groups"
+              image             = "osclient/python-openstackclient:latest"
+              image_pull_policy = "IfNotPresent"
+              command           = [
                 "/bin/bash",
                 "-xc",
                 "openstack security group list -c ID -c Name -f value | grep -v default | cut -d' ' -f1 | xargs -r openstack security group delete"
@@ -124,9 +128,10 @@ resource "kubernetes_cron_job" "tempest-pushgateway" {
             }
 
             container {
-              name  = "tempest-pushgateway"
-              image = "vexxhost/tempest-pushgateway:latest"
-              args  = var.tests
+              name              = "tempest-pushgateway"
+              image             = "vexxhost/tempest-pushgateway:latest"
+              image_pull_policy = "IfNotPresent"
+              args              = var.tests
 
               env_from {
                 secret_ref {
