@@ -15,7 +15,7 @@ resource "kubernetes_secret" "tempest-pushgateway" {
   data = merge(
     tomap({
       "OS_AUTH_TYPE"         = "password"
-      "OS_AUTH_URL"          = "http://keystone-api.openstack.svc.cluster.local:5000"
+      "OS_AUTH_URL"          = "http://keystone-api.openstack.svc.cluster.local:5000/v3"
       "OS_USER_DOMAIN_ID"    = "default"
       "OS_PROJECT_DOMAIN_ID" = "default"
       "TEMPEST_PROMETHEUS"   = "prometheus-pushgateway:9091"
