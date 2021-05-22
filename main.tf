@@ -63,7 +63,7 @@ resource "kubernetes_cron_job" "tempest-pushgateway" {
               name              = "purge-virtual-machines"
               image             = "osclient/python-openstackclient:latest"
               image_pull_policy = "IfNotPresent"
-              command           = [
+              command = [
                 "/bin/bash",
                 "-xc",
                 "openstack server list --name tempest -c ID -f value | xargs -r openstack server delete --wait"
@@ -80,7 +80,7 @@ resource "kubernetes_cron_job" "tempest-pushgateway" {
               name              = "purge-key-pairs"
               image             = "osclient/python-openstackclient:latest"
               image_pull_policy = "IfNotPresent"
-              command           = [
+              command = [
                 "/bin/bash",
                 "-xc",
                 "openstack keypair list -c Name -f value | xargs -r openstack keypair delete"
@@ -97,16 +97,18 @@ resource "kubernetes_cron_job" "tempest-pushgateway" {
               name              = "purge-volumes"
               image             = "osclient/python-openstackclient:latest"
               image_pull_policy = "IfNotPresent"
-              command           = [
-                "/bin/bash",
-                "-xc",
-                "openstack volume list --name tempest -c ID -f value | xargs -r openstack volume delete"
-              ]
+              command           = ["/tmp/purge_volumes.py"]
 
               env_from {
                 secret_ref {
                   name = kubernetes_secret.tempest-pushgateway.metadata[0].name
                 }
+              }
+
+              volume_mount {
+                name       = "scripts"
+                mount_path = "/tmp/purge_volumes.py"
+                sub_path   = "purge_volumes.py"
               }
             }
 
@@ -114,7 +116,7 @@ resource "kubernetes_cron_job" "tempest-pushgateway" {
               name              = "purge-security-groups"
               image             = "osclient/python-openstackclient:latest"
               image_pull_policy = "IfNotPresent"
-              command           = [
+              command = [
                 "/bin/bash",
                 "-xc",
                 "openstack security group list -c ID -c Name -f value | grep -v default | cut -d' ' -f1 | xargs -r openstack security group delete"
@@ -148,6 +150,14 @@ resource "kubernetes_cron_job" "tempest-pushgateway" {
                 ip        = host_aliases.value
               }
             }
+
+            volume {
+              name = "scripts"
+              config_map {
+                name         = kubernetes_config_map.scripts.metadata[0].name
+                default_mode = 0555
+              }
+            }
           }
         }
       }
@@ -155,8 +165,19 @@ resource "kubernetes_cron_job" "tempest-pushgateway" {
   }
 }
 
+resource "kubernetes_config_map" "scripts" {
+  metadata {
+    namespace = var.namespace
+    name      = "tempest-pushgateway"
+  }
+
+  data = {
+    "purge_volumes.py" = file("${path.module}/scripts/purge_volumes.py")
+  }
+}
+
 resource "kubectl_manifest" "prometheus-rules" {
-    yaml_body = <<YAML
+  yaml_body = <<YAML
 apiVersion: monitoring.coreos.com/v1
 kind: PrometheusRule
 metadata:
