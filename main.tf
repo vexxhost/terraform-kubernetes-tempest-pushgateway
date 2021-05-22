@@ -155,7 +155,7 @@ resource "kubernetes_cron_job" "tempest-pushgateway" {
               name = "scripts"
               config_map {
                 name         = kubernetes_config_map.scripts.metadata[0].name
-                default_mode = 0555
+                default_mode = "0555"
               }
             }
           }
