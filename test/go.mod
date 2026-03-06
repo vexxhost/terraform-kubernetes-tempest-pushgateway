@@ -1,6 +1,6 @@
 module github.com/vexxhost/terraform-kubernetes-tempest-pushgateway
 
-go 1.14
+go 1.22
 
 require (
 	github.com/gruntwork-io/terratest v0.32.23
